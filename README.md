@@ -22,7 +22,7 @@ WIDIT automates this entire process by:
 2. Layering WSL-specific configurations and optimizations
 3. Setting up proper user management with an interactive first-run experience
 4. Handling systemd service compatibility automatically
-5. Producing a ready-to-import WSL distribution tarball
+5. Producing a ready-to-import WSL distribution tarball with automatic import support
 
 ## Why This Approach?
 
@@ -39,6 +39,8 @@ WIDIT automates this entire process by:
 **🛠️ Developer-Friendly**: Uses familiar Docker tooling and concepts that developers already know.
 
 **📦 Portable**: Generated tarballs can be shared, version-controlled, and deployed across teams.
+
+**🚀 One-Click Import**: Optionally import distributions directly into WSL with proper Windows Terminal integration.
 
 ### Compared to Other Approaches
 
@@ -97,54 +99,59 @@ wsl ./creator.sh --base-image alpine:latest --output my-alpine-wsl
 
 The script accepts the following arguments:
 
-- **Base Image**: Specify a Docker image to use as the base for your WSL distribution
-  ```bash
-  ./creator.sh --base-image ubuntu:22.04
-  ./creator.sh --base-image debian:bullseye
-  ```
-
-- **Dockerfile**: Build from a local Dockerfile instead of using a base image
-  ```bash
-  ./creator.sh --dockerfile /path/to/Dockerfile
-  ./creator.sh --dockerfile ./custom.dockerfile
-  ```
-
-- **Output Name**: Specify a custom name for the output tarball
-  ```bash
-  ./creator.sh --base-image ubuntu:22.04 --output my-ubuntu-wsl
-  ```
+- **--base-image IMAGE**: Use a Docker base image (e.g., ubuntu:22.04, alpine:latest)
+- **--dockerfile PATH**: Build from a local Dockerfile
+- **--output NAME**: Output name for the distribution tarball (default: widit-custom-distro)
+- **--import**: Import the distribution into WSL after building
+- **--install-path PATH**: WSL installation path (default: C:\WSL\{output-name})
+- **--help**: Show help message
 
 ### Examples
 
-Create a WSL distribution from Ubuntu 22.04:
+**Build only (creates tarball for manual import):**
 ```bash
 ./creator.sh --base-image ubuntu:22.04
+./creator.sh --dockerfile ./my-custom.dockerfile
+./creator.sh --base-image alpine:latest --output my-alpine-wsl
 ```
 
-Build from a custom Dockerfile:
+**Build and auto-import to WSL:**
 ```bash
-./creator.sh --dockerfile ./my-custom-distro.dockerfile
+./creator.sh --base-image ubuntu:22.04 --import
+./creator.sh --base-image debian:bullseye --output my-debian --import
+./creator.sh --dockerfile ./custom.dockerfile --import --install-path C:\MyWSL\custom
 ```
 
-Create a custom Alpine-based distribution with a specific name:
-```bash
-./creator.sh --base-image alpine:latest --output my-alpine-dev
-```
-
-From PowerShell:
+**From PowerShell:**
 ```powershell
-wsl ./creator.sh --base-image ubuntu:22.04 --output ubuntu-dev-env
+wsl ./creator.sh --base-image ubuntu:22.04 --output ubuntu-dev-env --import
+wsl ./creator.sh --dockerfile ./enterprise.dockerfile --import
 ```
 
-The script will handle the entire process of building the Docker image, layering the WSL-specific configurations, and creating a ready-to-import WSL distribution tarball.
+### What Happens When You Use --import
 
-### Importing the Created Distribution
+When you use the `--import` flag, WIDIT will:
 
-After the script completes, you'll have a `.tar.gz` file that can be imported into WSL:
+1. **Build** the WSL distribution with all WSL-specific configurations
+2. **Import** the distribution into WSL at the specified location
+3. **Copy the icon** to the correct Windows filesystem location for Windows Terminal
+4. **Configure Windows Terminal** - the distribution includes a pre-configured terminal profile that Windows Terminal will automatically discover
+
+The imported distribution will appear in Windows Terminal with:
+- Proper icon display
+- Correct starting directory
+- Pre-configured color scheme (Catppuccin Mocha)
+- All WSL-specific optimizations
+
+### Manual Import (without --import flag)
+
+If you prefer to handle the import manually, the script will create a `.tar.gz` file:
 
 ```powershell
 wsl --import MyDistroName C:\WSL\MyDistroName widit-custom-distro.tar.gz
 ```
+
+After manual import, you can copy the icon and configure Windows Terminal yourself if desired.
 
 ## Developer details
 

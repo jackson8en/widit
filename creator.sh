@@ -8,6 +8,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BASE_IMAGE=""
 DOCKERFILE=""
 OUTPUT_NAME="widit-custom-distro"
+IMPORT_TO_WSL=false
+WSL_INSTALL_PATH=""
 
 show_help() {
     cat << EOF
@@ -19,12 +21,15 @@ Options:
     --base-image IMAGE      Use a Docker base image (e.g., ubuntu:22.04, alpine:latest)
     --dockerfile PATH       Build from a local Dockerfile
     --output NAME          Output name for the distribution tarball (default: widit-custom-distro)
+    --import               Import the distribution into WSL after building
+    --install-path PATH    WSL installation path (default: C:\\WSL\\{output-name})
     --help                 Show this help message
 
 Examples:
     $0 --base-image ubuntu:22.04
     $0 --dockerfile ./my-custom.dockerfile
-    $0 --base-image debian:bullseye --output my-debian-wsl
+    $0 --base-image debian:bullseye --output my-debian-wsl --import
+    $0 --base-image ubuntu:22.04 --import --install-path C:\\MyWSL\\ubuntu
 
 EOF
 }
@@ -44,6 +49,14 @@ while [[ $# -gt 0 ]]; do
             OUTPUT_NAME="$2"
             shift 2
             ;;
+        --import)
+            IMPORT_TO_WSL=true
+            shift
+            ;;
+        --install-path)
+            WSL_INSTALL_PATH="$2"
+            shift 2
+            ;;
         --help)
             show_help
             exit 0
@@ -55,6 +68,11 @@ while [[ $# -gt 0 ]]; do
             ;;
     esac
 done
+
+# Set default install path if importing but no path specified
+if [[ "$IMPORT_TO_WSL" == true && -z "$WSL_INSTALL_PATH" ]]; then
+    WSL_INSTALL_PATH="C:\\WSL\\$OUTPUT_NAME"
+fi
 
 # Validate arguments
 if [[ -z "$BASE_IMAGE" && -z "$DOCKERFILE" ]]; then
@@ -75,6 +93,14 @@ if ! command -v docker &> /dev/null; then
     exit 1
 fi
 
+# Check if WSL is available when importing
+if [[ "$IMPORT_TO_WSL" == true ]]; then
+    if ! command -v wsl.exe &> /dev/null; then
+        echo "Error: WSL is not available or not in PATH"
+        exit 1
+    fi
+fi
+
 echo "WIDIT Creator starting..."
 
 # Determine the base image to use
@@ -88,7 +114,7 @@ if [[ -n "$DOCKERFILE" ]]; then
     # Build the user's Dockerfile first to create a base image
     USER_IMAGE_TAG="widit-user-base:$(date +%s)"
     echo "Building user Dockerfile..."
-    docker build -f "$DOCKERFILE" -t "$USER_IMAGE_TAG" "$(dirname "$DOCKERFILE")"
+    docker build --no-cache -f "$DOCKERFILE" -t "$USER_IMAGE_TAG" "$(dirname "$DOCKERFILE")"
     BASE_IMAGE="$USER_IMAGE_TAG"
     
     # Set up cleanup for the user image
@@ -104,7 +130,7 @@ fi
 # Build the WSL distribution using wsl.dockerfile
 WSL_IMAGE_TAG="widit-wsl:$(date +%s)"
 echo "Building WSL distribution from base image: $BASE_IMAGE"
-docker build --build-arg BASE_IMAGE="$BASE_IMAGE" -f "$SCRIPT_DIR/wsl.dockerfile" -t "$WSL_IMAGE_TAG" "$SCRIPT_DIR"
+docker build --no-cache --build-arg BASE_IMAGE="$BASE_IMAGE" --build-arg OUTPUT_NAME="$OUTPUT_NAME" -f "$SCRIPT_DIR/wsl.dockerfile" -t "$WSL_IMAGE_TAG" "$SCRIPT_DIR"
 
 # Create container and export as tarball
 echo "Creating WSL distribution tarball..."
@@ -116,9 +142,34 @@ docker rm "$CONTAINER_ID"
 docker rmi "$WSL_IMAGE_TAG"
 
 echo "WSL distribution created successfully: ${OUTPUT_NAME}.tar.gz"
-echo ""
-echo "To import into WSL, run:"
-echo "wsl --import $OUTPUT_NAME C:\\path\\to\\install\\location ${OUTPUT_NAME}.tar.gz"
-echo ""
-echo "Example:"
-echo "wsl --import $OUTPUT_NAME C:\\WSL\\$OUTPUT_NAME ${OUTPUT_NAME}.tar.gz"
+
+# Import into WSL if requested
+if [[ "$IMPORT_TO_WSL" == true ]]; then
+    echo ""
+    echo "Importing distribution into WSL..."
+    
+    # Convert Unix path to Windows path for WSL command
+    TARBALL_PATH="$(pwd)/${OUTPUT_NAME}.tar.gz"
+    WINDOWS_TARBALL_PATH=$(wslpath -w "$TARBALL_PATH" 2>/dev/null || echo "$TARBALL_PATH")
+    
+    # Remove existing distribution if it exists
+    if wsl.exe -l -q | grep -q "^$OUTPUT_NAME$"; then
+        echo "Removing existing distribution: $OUTPUT_NAME"
+        wsl.exe --unregister "$OUTPUT_NAME"
+    fi
+    
+    # Import the distribution
+    echo "Importing $OUTPUT_NAME to $WSL_INSTALL_PATH..."
+    wsl.exe --import "$OUTPUT_NAME" "$WSL_INSTALL_PATH" "$WINDOWS_TARBALL_PATH"
+    
+    echo "Distribution imported successfully!"
+else
+    echo ""
+    echo "To import into WSL, run:"
+    echo "wsl --import $OUTPUT_NAME C:\\path\\to\\install\\location ${OUTPUT_NAME}.tar.gz"
+    echo ""
+    echo "Example:"
+    echo "wsl --import $OUTPUT_NAME C:\\WSL\\$OUTPUT_NAME ${OUTPUT_NAME}.tar.gz"
+    echo ""
+    echo "Or use the --import flag to have this script do it automatically."
+fi
