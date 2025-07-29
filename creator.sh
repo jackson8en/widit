@@ -130,7 +130,10 @@ fi
 # Build the WSL distribution using wsl.dockerfile
 WSL_IMAGE_TAG="widit-wsl:$(date +%s)"
 echo "Building WSL distribution from base image: $BASE_IMAGE"
-docker build --no-cache --build-arg BASE_IMAGE="$BASE_IMAGE" --build-arg OUTPUT_NAME="$OUTPUT_NAME" -f "$SCRIPT_DIR/wsl.dockerfile" -t "$WSL_IMAGE_TAG" "$SCRIPT_DIR"
+docker build --no-cache \
+    --build-arg BASE_IMAGE="$BASE_IMAGE" \
+    --build-arg OUTPUT_NAME="$OUTPUT_NAME" \
+    -f "$SCRIPT_DIR/wsl.dockerfile" -t "$WSL_IMAGE_TAG" "$SCRIPT_DIR"
 
 # Create container and export as tarball
 echo "Creating WSL distribution tarball..."
