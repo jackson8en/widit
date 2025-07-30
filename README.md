@@ -66,7 +66,9 @@ WIDIT automates this entire process by:
 
 ## Testimonials
 
-"The current design is actually quite elegant - it keeps the configuration simple while still allowing users to choose their own username through the interactive setup process." - Claude Sonnet 4.
+"The current design is actually quite elegant - it keeps the configuration simple while still allowing users to choose their own username through the interactive setup process." — Claude Sonnet 4.
+
+"WSL needs layers so you can take the distro, then layer corporate proxy stuff, then layer personal settings — wait... WIDIT? I'm excited!" — sweavo
 
 ## Pre-requisites
 
@@ -91,7 +93,7 @@ You can run the script directly from PowerShell or Command Prompt using WSL comm
 # From this directory:
 # Run creator.sh through WSL
 wsl ./creator.sh --base-image ubuntu:22.04
-wsl ./creator.sh --dockerfile ./my-custom.dockerfile
+wsl ./creator.sh --dockerfile demo.dockerfile
 wsl ./creator.sh --base-image alpine:latest --output my-alpine-wsl
 ```
 
@@ -111,7 +113,7 @@ The script accepts the following arguments:
 **Build only (creates tarball for manual import):**
 ```bash
 ./creator.sh --base-image ubuntu:22.04
-./creator.sh --dockerfile ./my-custom.dockerfile
+./creator.sh --dockerfile demo.dockerfile
 ./creator.sh --base-image alpine:latest --output my-alpine-wsl
 ```
 
@@ -119,7 +121,7 @@ The script accepts the following arguments:
 ```bash
 ./creator.sh --base-image ubuntu:22.04 --import
 ./creator.sh --base-image debian:bullseye --output my-debian --import
-./creator.sh --dockerfile ./custom.dockerfile --import --install-path C:\MyWSL\custom
+./creator.sh --dockerfile demo.dockerfile --import --install-path C:\MyWSL\custom
 ```
 
 **From PowerShell:**
@@ -183,4 +185,4 @@ This script removes the symlinks for the following units, effectively disabling 
 
 If you wish to override the default behavior and keep these units enabled, pass `DISABLE_PROBLEM_UNITS=false` to your Dockerfile environment before executing the WSL layering process.
 
-Systemd recommonedation from Microsoft: https://learn.microsoft.com/en-us/windows/wsl/build-custom-distro#systemd-recommendations
+Systemd recommendation from Microsoft: https://learn.microsoft.com/en-us/windows/wsl/build-custom-distro#systemd-recommendations

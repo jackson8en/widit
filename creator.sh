@@ -96,17 +96,26 @@ fi
 if [[ "$IMPORT_TO_WSL" == true && -z "$WSL_INSTALL_PATH" ]]; then
     WSL_INSTALL_PATH="C:\\WSL\\$OUTPUT_NAME"
 fi
+# Validate Environment
+## Check if Docker is available
 
-# Check if Docker is available
 if ! command -v docker &> /dev/null; then
     echo "Error: Docker is not installed or not in PATH"
     exit 1
 fi
 
-# Check if WSL is available when importing
+## Check if WSL is available when importing
 if [[ "$IMPORT_TO_WSL" == true ]]; then
     if ! command -v wsl.exe &> /dev/null; then
         echo "Error: WSL is not available or not in PATH"
+        exit 1
+    fi
+fi
+
+## Check the import target folder is suitable and created
+if [[ "$IMPORT_TO_WSL" == true ]]; then
+    if ! cmd.exe /C mkdir "$WSL_INSTALL_PATH" >/dev/null 2>&1; then
+        echo >&2 "Error: The directory for the wsl install exists and is non-empty."
         exit 1
     fi
 fi
