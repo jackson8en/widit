@@ -77,12 +77,12 @@ WIDIT automates this entire process by:
 
 ## Usage
 
-WIDIT can be run from any command prompt or terminal style through your WSL default distribution. The main entry point is the `creator.sh` script which handles building custom WSL distributions.
+WIDIT can be run from any command prompt or terminal style through your WSL default distribution. The main entry point is the `docker-to-wsl` script which handles building custom WSL distributions.
 
 ### From WSL Terminal
 
 ```bash
-./creator.sh [OPTIONS]
+./docker-to-wsl [OPTIONS]
 ```
 
 ### From PowerShell/Command Prompt
@@ -91,10 +91,10 @@ You can run the script directly from PowerShell or Command Prompt using WSL comm
 
 ```powershell
 # From this directory:
-# Run creator.sh through WSL
-wsl ./creator.sh --base-image ubuntu:22.04
-wsl ./creator.sh --dockerfile demo.dockerfile
-wsl ./creator.sh --base-image alpine:latest --output my-alpine-wsl
+# Run docker-to-wsl through WSL
+wsl ./docker-to-wsl --base-image ubuntu:22.04
+wsl ./docker-to-wsl --dockerfile demo.dockerfile
+wsl ./docker-to-wsl --base-image alpine:latest --output my-alpine-wsl
 ```
 
 ### Options
@@ -112,22 +112,22 @@ The script accepts the following arguments:
 
 **Build only (creates tarball for manual import):**
 ```bash
-./creator.sh --base-image ubuntu:22.04
-./creator.sh --dockerfile demo.dockerfile
-./creator.sh --base-image alpine:latest --output my-alpine-wsl
+./docker-to-wsl --base-image ubuntu:22.04
+./docker-to-wsl --dockerfile demo.dockerfile
+./docker-to-wsl --base-image alpine:latest --output my-alpine-wsl
 ```
 
 **Build and auto-import to WSL:**
 ```bash
-./creator.sh --base-image ubuntu:22.04 --import
-./creator.sh --base-image debian:bullseye --output my-debian --import
-./creator.sh --dockerfile demo.dockerfile --import --install-path C:\MyWSL\custom
+./docker-to-wsl --base-image ubuntu:22.04 --import
+./docker-to-wsl --base-image debian:bullseye --output my-debian --import
+./docker-to-wsl --dockerfile demo.dockerfile --import --install-path C:\MyWSL\custom
 ```
 
 **From PowerShell:**
 ```powershell
-wsl ./creator.sh --base-image ubuntu:22.04 --output ubuntu-dev-env --import
-wsl ./creator.sh --dockerfile ./enterprise.dockerfile --import
+wsl ./docker-to-wsl --base-image ubuntu:22.04 --output ubuntu-dev-env --import
+wsl ./docker-to-wsl --dockerfile ./enterprise.dockerfile --import
 ```
 
 ### What Happens When You Use --import

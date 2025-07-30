@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.4
 
 # This is the final layer to turn a docker image into a WSL image.
-# creator.sh will layer this on top of your base image or custom
+# docker-to-wsl will layer this on top of your base image or custom
 # dockerfile to create a WSL-compatible image.
 
 ARG BASE_IMAGE
