@@ -66,7 +66,9 @@ WIDIT automates this entire process by:
 
 ## Testimonials
 
-"The current design is actually quite elegant - it keeps the configuration simple while still allowing users to choose their own username through the interactive setup process." - Claude Sonnet 4.
+"The current design is actually quite elegant - it keeps the configuration simple while still allowing users to choose their own username through the interactive setup process." — Claude Sonnet 4.
+
+"WSL needs layers so you can take the distro, then layer corporate proxy stuff, then layer personal settings — wait... WIDIT? I'm excited!" — sweavo
 
 ## Pre-requisites
 
