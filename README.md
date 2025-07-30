@@ -93,7 +93,7 @@ You can run the script directly from PowerShell or Command Prompt using WSL comm
 # From this directory:
 # Run creator.sh through WSL
 wsl ./creator.sh --base-image ubuntu:22.04
-wsl ./creator.sh --dockerfile ./my-custom.dockerfile
+wsl ./creator.sh --dockerfile demo.dockerfile
 wsl ./creator.sh --base-image alpine:latest --output my-alpine-wsl
 ```
 
@@ -113,7 +113,7 @@ The script accepts the following arguments:
 **Build only (creates tarball for manual import):**
 ```bash
 ./creator.sh --base-image ubuntu:22.04
-./creator.sh --dockerfile ./my-custom.dockerfile
+./creator.sh --dockerfile demo.dockerfile
 ./creator.sh --base-image alpine:latest --output my-alpine-wsl
 ```
 
@@ -121,7 +121,7 @@ The script accepts the following arguments:
 ```bash
 ./creator.sh --base-image ubuntu:22.04 --import
 ./creator.sh --base-image debian:bullseye --output my-debian --import
-./creator.sh --dockerfile ./custom.dockerfile --import --install-path C:\MyWSL\custom
+./creator.sh --dockerfile demo.dockerfile --import --install-path C:\MyWSL\custom
 ```
 
 **From PowerShell:**
