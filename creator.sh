@@ -7,7 +7,7 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BASE_IMAGE=""
 DOCKERFILE=""
-OUTPUT_NAME="widit-custom-distro"
+OUTPUT_NAME=""
 IMPORT_TO_WSL=false
 WSL_INSTALL_PATH=""
 
@@ -20,7 +20,7 @@ Usage: $0 [OPTIONS]
 Options:
     --base-image IMAGE      Use a Docker base image (e.g., ubuntu:22.04, alpine:latest)
     --dockerfile PATH       Build from a local Dockerfile
-    --output NAME          Output name for the distribution tarball (default: widit-custom-distro)
+    --output NAME          Output name for the distribution tarball (default: taken from base-image or dockerfile name)
     --import               Import the distribution into WSL after building
     --install-path PATH    WSL installation path (default: C:\\WSL\\{output-name})
     --help                 Show this help message
@@ -69,11 +69,6 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# Set default install path if importing but no path specified
-if [[ "$IMPORT_TO_WSL" == true && -z "$WSL_INSTALL_PATH" ]]; then
-    WSL_INSTALL_PATH="C:\\WSL\\$OUTPUT_NAME"
-fi
-
 # Validate arguments
 if [[ -z "$BASE_IMAGE" && -z "$DOCKERFILE" ]]; then
     echo "Error: Either --base-image or --dockerfile must be specified"
@@ -87,8 +82,23 @@ if [[ -n "$BASE_IMAGE" && -n "$DOCKERFILE" ]]; then
     exit 1
 fi
 
+if [[ -n "$BASE_IMAGE" ]]; then
+    NAME_STEM="${BASE_IMAGE/:/-}"
+else
+    NAME_STEM="${DOCKERFILE%%.dockerfile}"
+fi
+
+if [[ -z "$OUTPUT_NAME" ]]; then
+    OUTPUT_NAME="widit-${NAME_STEM}"
+fi
+
+# Set default install path if importing but no path specified
+if [[ "$IMPORT_TO_WSL" == true && -z "$WSL_INSTALL_PATH" ]]; then
+    WSL_INSTALL_PATH="C:\\WSL\\$OUTPUT_NAME"
+fi
 # Validate Environment
 ## Check if Docker is available
+
 if ! command -v docker &> /dev/null; then
     echo "Error: Docker is not installed or not in PATH"
     exit 1
@@ -173,6 +183,7 @@ if [[ "$IMPORT_TO_WSL" == true ]]; then
     # Import the distribution
     echo "Importing $OUTPUT_NAME to $WSL_INSTALL_PATH..."
     wsl.exe --import "$OUTPUT_NAME" "$WSL_INSTALL_PATH" "$WINDOWS_TARBALL_PATH"
+
     echo "Distribution imported successfully!"
 else
     echo ""
