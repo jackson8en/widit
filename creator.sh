@@ -110,13 +110,13 @@ if [[ -n "$DOCKERFILE" ]]; then
         echo "Error: Dockerfile not found at $DOCKERFILE"
         exit 1
     fi
-    
+
     # Build the user's Dockerfile first to create a base image
     USER_IMAGE_TAG="widit-user-base:$(date +%s)"
     echo "Building user Dockerfile..."
     docker build --no-cache -f "$DOCKERFILE" -t "$USER_IMAGE_TAG" "$(dirname "$DOCKERFILE")"
     BASE_IMAGE="$USER_IMAGE_TAG"
-    
+
     # Set up cleanup for the user image
     cleanup_user_image() {
         echo "Cleaning up user base image..."
@@ -150,21 +150,21 @@ echo "WSL distribution created successfully: ${OUTPUT_NAME}.tar.gz"
 if [[ "$IMPORT_TO_WSL" == true ]]; then
     echo ""
     echo "Importing distribution into WSL..."
-    
+
     # Convert Unix path to Windows path for WSL command
     TARBALL_PATH="$(pwd)/${OUTPUT_NAME}.tar.gz"
     WINDOWS_TARBALL_PATH=$(wslpath -w "$TARBALL_PATH" 2>/dev/null || echo "$TARBALL_PATH")
-    
+
     # Remove existing distribution if it exists
     if wsl.exe -l -q | grep -q "^$OUTPUT_NAME$"; then
         echo "Removing existing distribution: $OUTPUT_NAME"
         wsl.exe --unregister "$OUTPUT_NAME"
     fi
-    
+
     # Import the distribution
     echo "Importing $OUTPUT_NAME to $WSL_INSTALL_PATH..."
     wsl.exe --import "$OUTPUT_NAME" "$WSL_INSTALL_PATH" "$WINDOWS_TARBALL_PATH"
-    
+
     echo "Distribution imported successfully!"
 else
     echo ""
