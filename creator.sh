@@ -25,8 +25,13 @@ Options:
     --install-path PATH    WSL installation path (default: C:\\WSL\\{output-name})
     --help                 Show this help message
 
+Note:
+    --base-image or --dockerfile can be omitted and just the image (containing a :) or docker
+    file (ending in .dockerfile) can be provided.
+
+
 Examples:
-    $0 --base-image ubuntu:22.04
+    $0 ubuntu:22.04
     $0 --dockerfile ./my-custom.dockerfile
     $0 --base-image debian:bullseye --output my-debian-wsl --import
     $0 --base-image ubuntu:22.04 --import --install-path C:\\MyWSL\\ubuntu
@@ -36,37 +41,45 @@ EOF
 
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do
-    case $1 in
-        --base-image)
-            BASE_IMAGE="$2"
-            shift 2
-            ;;
-        --dockerfile)
-            DOCKERFILE="$2"
-            shift 2
-            ;;
-        --output)
-            OUTPUT_NAME="$2"
-            shift 2
-            ;;
-        --import)
-            IMPORT_TO_WSL=true
-            shift
-            ;;
-        --install-path)
-            WSL_INSTALL_PATH="$2"
-            shift 2
-            ;;
-        --help)
-            show_help
-            exit 0
-            ;;
-        *)
-            echo "Unknown option: $1"
-            show_help
-            exit 1
-            ;;
-    esac
+    if [[ "$1" == *.dockerfile ]]; then
+        DOCKERFILE="$1"
+        shift
+    elif [[ "$1" == *:* ]]; then
+        BASE_IMAGE="$1"
+        shift
+    else
+        case $1 in
+            --base-image)
+                BASE_IMAGE="$2"
+                shift 2
+                ;;
+            --dockerfile)
+                DOCKERFILE="$2"
+                shift 2
+                ;;
+            --output)
+                OUTPUT_NAME="$2"
+                shift 2
+                ;;
+            --import)
+                IMPORT_TO_WSL=true
+                shift
+                ;;
+            --install-path)
+                WSL_INSTALL_PATH="$2"
+                shift 2
+                ;;
+            --help)
+                show_help
+                exit 0
+                ;;
+            *)
+                echo "Unknown option: $1"
+                show_help
+                exit 1
+                ;;
+        esac
+    fi
 done
 
 # Validate arguments
