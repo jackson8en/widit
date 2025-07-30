@@ -20,10 +20,11 @@ Usage: $0 [OPTIONS]
 Options:
     --base-image IMAGE      Use a Docker base image (e.g., ubuntu:22.04, alpine:latest)
     --dockerfile PATH       Build from a local Dockerfile
-    --output NAME          Output name for the distribution tarball (default: taken from base-image or dockerfile name)
-    --import               Import the distribution into WSL after building
-    --install-path PATH    WSL installation path (default: C:\\WSL\\{output-name})
-    --help                 Show this help message
+    --output NAME           Output name for the distribution tarball (default: taken from base-image or dockerfile name)
+    --import                Import the distribution into WSL after building
+    --install-path PATH     WSL installation path (default: C:\\WSL\\{output-name})
+    --debug                 Be more verbose, e.g. --progress=plain for docker build
+    --help                  Show this help message
 
 Note:
     --base-image or --dockerfile can be omitted and just the image (containing a :) or docker
@@ -68,6 +69,10 @@ while [[ $# -gt 0 ]]; do
             --install-path)
                 WSL_INSTALL_PATH="$2"
                 shift 2
+                ;;
+            --debug)
+                DOCKER_BUILD_OPTS=--progress=plain
+                shift
                 ;;
             --help)
                 show_help
@@ -146,7 +151,7 @@ if [[ -n "$DOCKERFILE" ]]; then
     # Build the user's Dockerfile first to create a base image
     USER_IMAGE_TAG="widit-user-base:$(date +%s)"
     echo "Building user Dockerfile..."
-    docker build --no-cache -f "$DOCKERFILE" -t "$USER_IMAGE_TAG" "$(dirname "$DOCKERFILE")"
+    docker build $DOCKER_BUILD_OPTS --no-cache -f "$DOCKERFILE" -t "$USER_IMAGE_TAG" "$(dirname "$DOCKERFILE")"
     BASE_IMAGE="$USER_IMAGE_TAG"
 
     # Set up cleanup for the user image
@@ -162,7 +167,7 @@ fi
 # Build the WSL distribution using wsl.dockerfile
 WSL_IMAGE_TAG="widit-wsl:$(date +%s)"
 echo "Building WSL distribution from base image: $BASE_IMAGE"
-docker build --no-cache \
+docker build $DOCKER_BUILD_OPTS --no-cache \
     --build-arg BASE_IMAGE="$BASE_IMAGE" \
     --build-arg OUTPUT_NAME="$OUTPUT_NAME" \
     -f "$SCRIPT_DIR/wsl.dockerfile" -t "$WSL_IMAGE_TAG" "$SCRIPT_DIR"
