@@ -183,4 +183,4 @@ This script removes the symlinks for the following units, effectively disabling 
 
 If you wish to override the default behavior and keep these units enabled, pass `DISABLE_PROBLEM_UNITS=false` to your Dockerfile environment before executing the WSL layering process.
 
-Systemd recommonedation from Microsoft: https://learn.microsoft.com/en-us/windows/wsl/build-custom-distro#systemd-recommendations
+Systemd recommendation from Microsoft: https://learn.microsoft.com/en-us/windows/wsl/build-custom-distro#systemd-recommendations
