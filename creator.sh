@@ -156,7 +156,7 @@ if [[ "$IMPORT_TO_WSL" == true ]]; then
     WINDOWS_TARBALL_PATH=$(wslpath -w "$TARBALL_PATH" 2>/dev/null || echo "$TARBALL_PATH")
     
     # Remove existing distribution if it exists
-    if wsl.exe -l -q | grep -q "^$OUTPUT_NAME$"; then
+    if wsl.exe -l -q | iconv -f UTF-16LE -t UTF-8 | grep -q "^$OUTPUT_NAME$"; then
         echo "Removing existing distribution: $OUTPUT_NAME"
         wsl.exe --unregister "$OUTPUT_NAME"
     fi
